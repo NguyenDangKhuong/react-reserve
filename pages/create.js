@@ -1,5 +1,7 @@
 import React from 'react'
 import { Form, Input, TextArea, Button, Image, Header, Icon, Message } from 'semantic-ui-react'
+import axios from 'axios'
+import baseUrl from '../utils/baseUrl'
 
 const INITIAL_PRODUCT = {
   name: '',
@@ -8,20 +10,49 @@ const INITIAL_PRODUCT = {
   description: ''
 }
 
-function CreateProduct() {
+function CreateProduct () {
   const [product, setProduct] = React.useState(INITIAL_PRODUCT)
   const [mediaPreview, setMediaPreview] = React.useState('')
   const [success, setSuccess] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
+  const [disabled, setDisabled] = React.useState(true)
+
+  React.useEffect(() => {
+    const isProduct = Object.values(product).every(el => Boolean(el))
+    isProduct ? setDisabled(false) : setDisabled(true)
+  }, [])
 
   const handleChange = e => {
     const { name, value, files } = e.target
-    if(name === 'media') {
-      setProduct(prevState => ({...prevState, media: files[0] }))
+    if (name === 'media') {
+      setProduct(prevState => ({ ...prevState, media: files[0] }))
       setMediaPreview(window.URL.createObjectURL(files[0]))
     } else {
-      setProduct(prevState => ({...prevState, [name]: value }))
+      setProduct(prevState => ({ ...prevState, [name]: value }))
     }
-    console.log(product)
+  }
+
+  const handleUploadImage = async () => {
+    const data = new FormData()
+    data.append('file', product.media)
+    data.append('upload_preset', 'reactreserve')
+    data.append('cloud_name', 'asoview')
+    const res = await axios.post(process.env.CLOUDINARY_URL, data)
+    const mediaUrl = res.data.url
+    return mediaUrl
+  }
+
+  const handlePostRequest = async e => {
+    e.preventDefault()
+    setLoading(true)
+    const mediaUrl = await handleUploadImage()
+    const url = `${baseUrl}/api/product`
+    const { name, price, description } = product
+    const payload = { name, price, description, mediaUrl }
+    await axios.post(url, payload)
+    setLoading(false)
+    setProduct(INITIAL_PRODUCT)
+    setSuccess(true)
   }
 
   return <>
@@ -29,23 +60,19 @@ function CreateProduct() {
       <Icon name='add' color='orange' />
       Create New Product
     </Header>
-    <Form 
+    <Form
+      loading={loading}
       success={success}
-      onSubmit={e => {
-        e.preventDefault()
-        console.log(product)
-        setProduct(INITIAL_PRODUCT)
-        setSuccess(true)
-      }}
+      onSubmit={handlePostRequest}
     >
-      <Message 
+      <Message
         success
         icon='check'
         header='Success!'
         content='Your product has been posted'
       />
       <Form.Group widths='equal'>
-        <Form.Field 
+        <Form.Field
           control={Input}
           name='name'
           label='Name'
@@ -53,7 +80,7 @@ function CreateProduct() {
           value={product.name}
           onChange={handleChange}
         />
-        <Form.Field 
+        <Form.Field
           control={Input}
           name='price'
           label='Price'
@@ -64,7 +91,7 @@ function CreateProduct() {
           value={product.price}
           onChange={handleChange}
         />
-         <Form.Field 
+        <Form.Field
           control={Input}
           name='media'
           label='Media'
@@ -75,7 +102,7 @@ function CreateProduct() {
         />
       </Form.Group>
       <Image src={mediaPreview} rounded centered size='small' />
-      <Form.Field 
+      <Form.Field
         control={TextArea}
         name='description'
         label='Description'
@@ -83,14 +110,15 @@ function CreateProduct() {
         value={product.description}
         onChange={handleChange}
       />
-      <Form.Field 
+      <Form.Field
         control={Button}
+        disabled={disabled || loading}
         color='blue'
         icon='pencil alternate'
         content='Submit'
       />
     </Form>
-  </>;
+  </>
 }
 
-export default CreateProduct;
+export default CreateProduct
