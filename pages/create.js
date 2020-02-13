@@ -2,6 +2,7 @@ import React from 'react'
 import { Form, Input, TextArea, Button, Image, Header, Icon, Message } from 'semantic-ui-react'
 import axios from 'axios'
 import baseUrl from '../utils/baseUrl'
+import catchError from '../utils/catchErrors'
 
 const INITIAL_PRODUCT = {
   name: '',
@@ -16,11 +17,12 @@ function CreateProduct () {
   const [success, setSuccess] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
   const [disabled, setDisabled] = React.useState(true)
+  const [error, setError] = React.useState('')
 
   React.useEffect(() => {
     const isProduct = Object.values(product).every(el => Boolean(el))
     isProduct ? setDisabled(false) : setDisabled(true)
-  }, [])
+  }, [product])
 
   const handleChange = e => {
     const { name, value, files } = e.target
@@ -42,17 +44,23 @@ function CreateProduct () {
     return mediaUrl
   }
 
-  const handlePostRequest = async e => {
-    e.preventDefault()
-    setLoading(true)
-    const mediaUrl = await handleUploadImage()
-    const url = `${baseUrl}/api/product`
-    const { name, price, description } = product
-    const payload = { name, price, description, mediaUrl }
-    await axios.post(url, payload)
-    setLoading(false)
-    setProduct(INITIAL_PRODUCT)
-    setSuccess(true)
+  const handleSubmit = async e => {
+    try {
+      e.preventDefault()
+      setLoading(true)
+      const mediaUrl = await handleUploadImage()
+      const url = `${baseUrl}/api/product`
+      const { name, price, description } = product
+      const payload = { name, price, description, mediaUrl }
+      await axios.post(url, payload)
+      setProduct(INITIAL_PRODUCT)
+      setSuccess(true)
+    } catch (err) {
+      catchError(err, setError)
+      console.error('ERROR!', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return <>
@@ -63,8 +71,14 @@ function CreateProduct () {
     <Form
       loading={loading}
       success={success}
-      onSubmit={handlePostRequest}
+      error={Boolean(error)}
+      onSubmit={handleSubmit}
     >
+      <Message
+        error
+        header='Oops!'
+        content={error}
+      />
       <Message
         success
         icon='check'
