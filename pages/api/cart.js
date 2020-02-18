@@ -20,7 +20,7 @@ export default async (req, res) => {
   }
 }
 
-async function handleGetRequest(req, res) => {
+async function handleGetRequest(req, res) {
   if (!('authorization' in req.headers)) {
     return res.status(401).send('No authorization token!')
   }
@@ -36,7 +36,7 @@ async function handleGetRequest(req, res) => {
   }
 }
 
-async function handlePutRequest(req, res) => {
+async function handlePutRequest(req, res) {
   const { quantity, productId } = req.body
   if (!('authorization' in req.headers)) {
     return res.status(401).send('No authorization token!')
@@ -49,7 +49,7 @@ async function handlePutRequest(req, res) => {
     const productExists = cart.products.some(doc => ObjectId(productId).equals(doc.product))
     // if so, increment quantity
     if (productExists) {
-      Cart.findOneAndUpdate( 
+      await Cart.findOneAndUpdate( 
         { _id: cart._id, 'products.product': productId },
         { $inc: { 'products.$.quantity': quantity } }
       )
