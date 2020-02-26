@@ -1,6 +1,8 @@
 import Product from '../../models/Product'
 import Cart from '../../models/Cart'
+import Order from '../../models/Order'
 import connectDb from '../../utils/connectDb'
+import jwt from 'jsonwebtoken'
 
 connectDb()
 
@@ -47,10 +49,19 @@ async function handleDeleteRequest (req, res) {
     // 1) Delete product by id
     await Product.findOneAndRemove({ _id })
     // 2) Remove product from all carts, referenced as 'product'
-    // await Cart.updateMany(
-    //   { 'products.product': _id },
-    //   { $pull: { products: { product: _id } } }
-    // )
+    await Cart.updateMany(
+      { 'products.product': _id },
+      { $pull: { products: { product: _id } } }
+    )
+    // remove product in order history
+    const { userId } = jwt.verify(req.headers.authorization, process.env.JWT_SECRET)
+    await Order.find({ user: userId }).updateMany(
+      { 'products.product': _id },
+      { $pull: { products: { product: _id } } }
+    )
+    // const isExistProductInOrder = await Order.find({ user: userId }, { products: { $exists: true } });
+    // console.log('isExistProductInOrder', isExistProductInOrder)
+
     res.status(204).json({})
   } catch (error) {
     console.log(error)
