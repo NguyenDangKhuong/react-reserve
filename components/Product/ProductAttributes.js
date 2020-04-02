@@ -3,6 +3,7 @@ import { Header, Button, Modal } from 'semantic-ui-react'
 import baseUrl from '../../utils/baseUrl'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import cookie from 'js-cookie'
 
 function ProductAttributes ({ description, _id, user }) {
   const [modal, setModal] = React.useState(false)
@@ -38,8 +39,9 @@ function ProductAttributes ({ description, _id, user }) {
               labelPosition='right'
               content='Delete'
               onClick={async () => {
+                const token = cookie.get('token')
                 const url = `${baseUrl}/api/product`
-                const payload = { params: { _id } }
+                const payload = { params: { _id }, headers: { Authorization: token } }
                 await axios.delete(url, payload)
                 router.push('/')
               }}
