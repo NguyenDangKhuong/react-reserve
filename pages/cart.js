@@ -58,7 +58,7 @@ function Cart ({ products, user }) {
 Cart.getInitialProps = async ctx => {
   const { token } = parseCookies(ctx)
   if (!token) {
-    return { product: [] }
+    return { products: [] }
   }
   const url = `${baseUrl}/api/cart`
   const payload = { headers: { Authorization: token } }
