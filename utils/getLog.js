@@ -7,4 +7,6 @@ const options = {
   app: 'ndkhuong-react-reserve'
 }
 
-export const log = Logger.setupDefaultLogger(process.env.LOGGER_KEY, options)
+const log = Logger.setupDefaultLogger(process.env.LOGGER_KEY, options)
+
+export default log

@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
 import Cart from '../../models/Cart'
 import connectDb from '../../utils/connectDb'
-import log from '../../utils/log'
+import log from '../../utils/getLog'
 
 connectDb()
 
@@ -30,16 +30,18 @@ async function handleGetRequest (req, res) {
   }
   try {
     const { userId } = jwt.verify(req.headers.authorization, process.env.JWT_SECRET)
-    log(`userId: ${userId}`)
-    log(`req.headers.authorization: ${req.headers.authorization}`)
+    // log(`userId: ${userId}`)
+    // log(`req.headers.authorization: ${req.headers.authorization}`)
     const cart = await Cart.findOne({ user: userId }).populate({
       path: 'products.product',
       model: 'Product'
     })
-    log(`cart: ${cart}`)
+    console.log('cart', cart)
+    // log(`cart: ${cart}`)
     res.status(200).json(cart.products)
   } catch (error) {
-    log(error)
+    // log(error)
+    console.log('err', error)
     res.status(403).send('Please login again')
   }
 }
