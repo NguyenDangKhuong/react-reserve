@@ -1,10 +1,10 @@
 import { Icon, Header, Segment, Label } from 'semantic-ui-react'
 import formatDate from '../../utils/formatDate'
 
-function AccountHeader({ role, email, name, createdAt }) {
+function AccountHeader ({ role, email, name, createdAt }) {
   return (
     <Segment secondary inverted color='violet'>
-      <Label 
+      <Label
         color='teal'
         size='large'
         ribbon
@@ -22,4 +22,4 @@ function AccountHeader({ role, email, name, createdAt }) {
   )
 }
 
-export default AccountHeader;
+export default AccountHeader

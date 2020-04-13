@@ -1,7 +1,7 @@
 import { Item, Label } from 'semantic-ui-react'
 import AddProductToCard from './AddProductToCart'
 
-function ProductSummary({ name, mediaUrl, _id, price, sku, user }) {
+function ProductSummary ({ name, mediaUrl, _id, price, sku, user }) {
   return (
     <Item.Group>
       <Item>
@@ -21,4 +21,4 @@ function ProductSummary({ name, mediaUrl, _id, price, sku, user }) {
   )
 }
 
-export default ProductSummary;
+export default ProductSummary
